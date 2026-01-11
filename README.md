@@ -13,7 +13,7 @@ A cross-platform PDF to image converter using PDFium (via WebAssembly).
 ## Installation
 
 ```bash
-go install github.com/potatoqualitee/aitools/tools/pdf2img@latest
+go install github.com/potatoqualitee/pdf2img@latest
 ```
 
 Or build from source:

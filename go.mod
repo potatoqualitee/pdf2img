@@ -1,4 +1,4 @@
-module github.com/potatoqualitee/aitools/tools/pdf2img
+module github.com/potatoqualitee/pdf2img
 
 go 1.24.0
 
