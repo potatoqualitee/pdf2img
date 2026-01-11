@@ -102,7 +102,7 @@ jobs:
           ./pdf2img tests/immunization.pdf -o output/jpeg -f jpeg -q 90 -d 200
           echo "JPEG files created:"
           ls -la output/jpeg/
-          test -f output/jpeg/immunization_page_001.jpeg || exit 1
+          test -f output/jpeg/immunization_page_001.jpg || exit 1
 
       - name: Test JSON output mode
         run: |
