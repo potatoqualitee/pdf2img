@@ -108,7 +108,7 @@ jobs:
         run: |
           mkdir -p output/json
           ./pdf2img tests/immunization.pdf -o output/json -f png --json | tee result.json
-          cat result.json | grep -q '"success": true' || exit 1
+          cat result.json | grep -q '"Success": true' || exit 1
 
       - name: Test custom prefix
         run: |
