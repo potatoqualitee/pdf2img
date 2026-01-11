@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/potatoqualitee/aitools/tools/pdf2img/converter"
+	"github.com/potatoqualitee/pdf2img/converter"
 	"github.com/spf13/pflag"
 )
 
