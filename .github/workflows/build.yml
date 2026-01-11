@@ -94,7 +94,7 @@ jobs:
           ./pdf2img tests/immunization.pdf -o output/png -f png -d 150
           echo "PNG files created:"
           ls -la output/png/
-          test -f output/png/immunization_page_1.png || exit 1
+          test -f output/png/immunization_page_001.png || exit 1
 
       - name: Test JPEG conversion
         run: |
@@ -102,7 +102,7 @@ jobs:
           ./pdf2img tests/immunization.pdf -o output/jpeg -f jpeg -q 90 -d 200
           echo "JPEG files created:"
           ls -la output/jpeg/
-          test -f output/jpeg/immunization_page_1.jpeg || exit 1
+          test -f output/jpeg/immunization_page_001.jpeg || exit 1
 
       - name: Test JSON output mode
         run: |
@@ -115,7 +115,7 @@ jobs:
           mkdir -p output/prefix
           ./pdf2img tests/immunization.pdf -o output/prefix -f png --prefix myprefix
           ls -la output/prefix/
-          test -f output/prefix/myprefix_page_1.png || exit 1
+          test -f output/prefix/myprefix_page_001.png || exit 1
 
       - name: Test version flag
         run: ./pdf2img --version
