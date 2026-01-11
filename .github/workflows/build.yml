@@ -8,11 +8,13 @@ on:
       - 'go.mod'
       - 'go.sum'
       - '.github/workflows/build.yml'
+      - 'tests/**'
   pull_request:
     paths:
       - '**.go'
       - 'go.mod'
       - 'go.sum'
+      - 'tests/**'
   workflow_dispatch:
 
 jobs:
@@ -67,8 +69,67 @@ jobs:
           path: ${{ matrix.output }}
           retention-days: 30
 
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache-dependency-path: go.sum
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build binary
+        run: go build -o pdf2img .
+
+      - name: Test PNG conversion
+        run: |
+          mkdir -p output/png
+          ./pdf2img tests/immunization.pdf -o output/png -f png -d 150
+          echo "PNG files created:"
+          ls -la output/png/
+          test -f output/png/immunization_page_1.png || exit 1
+
+      - name: Test JPEG conversion
+        run: |
+          mkdir -p output/jpeg
+          ./pdf2img tests/immunization.pdf -o output/jpeg -f jpeg -q 90 -d 200
+          echo "JPEG files created:"
+          ls -la output/jpeg/
+          test -f output/jpeg/immunization_page_1.jpeg || exit 1
+
+      - name: Test JSON output mode
+        run: |
+          mkdir -p output/json
+          ./pdf2img tests/immunization.pdf -o output/json -f png --json | tee result.json
+          cat result.json | grep -q '"success": true' || exit 1
+
+      - name: Test custom prefix
+        run: |
+          mkdir -p output/prefix
+          ./pdf2img tests/immunization.pdf -o output/prefix -f png --prefix myprefix
+          ls -la output/prefix/
+          test -f output/prefix/myprefix_page_1.png || exit 1
+
+      - name: Test version flag
+        run: ./pdf2img --version
+
+      - name: Upload test output
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-output
+          path: output/
+          retention-days: 7
+
   package:
-    needs: build
+    needs: [build, test]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 

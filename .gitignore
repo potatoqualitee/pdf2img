@@ -18,8 +18,11 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Test files
-*.pdf
+# Test output files
 *.png
 *.jpg
 *.jpeg
+
+# Allow test PDFs in tests folder
+*.pdf
+!tests/*.pdf
