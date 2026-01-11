@@ -1,0 +1,111 @@
+name: Build pdf2img
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - '.github/workflows/build.yml'
+  pull_request:
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            output: pdf2img-linux-amd64
+          - os: ubuntu-latest
+            goos: darwin
+            goarch: amd64
+            output: pdf2img-darwin-amd64
+          - os: ubuntu-latest
+            goos: darwin
+            goarch: arm64
+            output: pdf2img-darwin-arm64
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            output: pdf2img-windows-amd64.exe
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache-dependency-path: go.sum
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        run: |
+          go build -ldflags="-s -w -X main.version=${{ github.sha }}" -o ${{ matrix.output }} .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.output }}
+          path: ${{ matrix.output }}
+          retention-days: 30
+
+  package:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Prepare binaries
+        run: |
+          mkdir -p bin
+          mv artifacts/pdf2img-windows-amd64.exe/pdf2img-windows-amd64.exe bin/
+          mv artifacts/pdf2img-linux-amd64/pdf2img-linux-amd64 bin/
+          mv artifacts/pdf2img-darwin-amd64/pdf2img-darwin-amd64 bin/
+          mv artifacts/pdf2img-darwin-arm64/pdf2img-darwin-arm64 bin/
+          chmod +x bin/pdf2img-linux-* bin/pdf2img-darwin-*
+          ls -la bin/
+
+      - name: Upload packaged binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf2img-all-platforms
+          path: bin/
+          retention-days: 90
+
+      - name: Create Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            bin/pdf2img-windows-amd64.exe
+            bin/pdf2img-linux-amd64
+            bin/pdf2img-darwin-amd64
+            bin/pdf2img-darwin-arm64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

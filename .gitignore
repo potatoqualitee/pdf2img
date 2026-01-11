@@ -1,0 +1,25 @@
+# Binaries
+pdf2img
+pdf2img.exe
+pdf2img-*
+*.exe
+
+# Build artifacts
+bin/
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test files
+*.pdf
+*.png
+*.jpg
+*.jpeg
